@@ -35,7 +35,7 @@ npm install
 ### ▶️ Running the App
 
 ```bash
-node app.js
+node start
 ```
 
 Open your browser and go to:  
