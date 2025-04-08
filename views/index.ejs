@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>OIDC Tester</title>
+  <style>
+    .config-block {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+    }
+    .config-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    input[type="text"] {
+      width: 100%;
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h2>OIDC Configuration Tester</h2>
+  <div id="config-list"></div>
+
+  <button onclick="addConfig()">➕ Add Configuration</button>
+
+  <script>
+    function loadConfigs() {
+      return JSON.parse(localStorage.getItem('oidcConfigs') || '[]');
+    }
+
+    function saveConfigs(configs) {
+      localStorage.setItem('oidcConfigs', JSON.stringify(configs));
+    }
+
+    function createConfigForm(config = {}, index = null) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'config-block';
+
+      const header = document.createElement('div');
+      header.className = 'config-header';
+      header.innerHTML = `<strong>Config ${index + 1}</strong>
+        <button onclick="deleteConfig(${index})">🗑️ Remove</button>`;
+      wrapper.appendChild(header);
+
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = '/start';
+
+      ['label', 'discovery_url', 'client_id', 'client_secret', 'redirect_uri', 'scope'].forEach(field => {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.name = field;
+        input.placeholder = field.replace('_', ' ').toUpperCase();
+        input.value = config[field] || '';
+        input.oninput = () => updateConfig(index, formToObject(form), field);
+        form.appendChild(input);
+      });
+
+      const submit = document.createElement('button');
+      submit.type = 'submit';
+      submit.innerText = '▶️ Run';
+      form.appendChild(submit);
+
+      wrapper.appendChild(form);
+      return wrapper;
+    }
+
+    function formToObject(form) {
+      const data = {};
+      for (const el of form.elements) {
+        if (el.name) data[el.name] = el.value;
+      }
+      return data;
+    }
+
+    function updateConfig(index, data, field) {
+      const configs = loadConfigs();
+      configs[index] = { ...configs[index], ...data };
+      saveConfigs(configs);
+    }
+
+    function deleteConfig(index) {
+      const configs = loadConfigs();
+      configs.splice(index, 1);
+      saveConfigs(configs);
+      renderConfigs();
+    }
+
+    function addConfig() {
+      const configs = loadConfigs();
+      configs.push({});
+      saveConfigs(configs);
+      renderConfigs();
+    }
+
+    function renderConfigs() {
+      const list = document.getElementById('config-list');
+      list.innerHTML = '';
+      const configs = loadConfigs();
+      configs.forEach((cfg, i) => {
+        const form = createConfigForm(cfg, i);
+        list.appendChild(form);
+      });
+    }
+
+    // On load
+    renderConfigs();
+  </script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Tokens</title>
+  <style>
+    pre { background: #f5f5f5; padding: 10px; border-radius: 5px; }
+  </style>
+  <script>
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => alert("Copied!"));
+    }
+
+    function formatExpiration(exp) {
+      if (!exp) return '';
+      const date = new Date(exp * 1000);
+      return date.toLocaleString();
+    }
+  </script>
+</head>
+<body>
+  <% if (access_token) { %>
+    <h2>Access Token</h2>
+    <button onclick='copyToClipboard("<%= access_token %>")'>Copy Access Token</button>
+    <pre><%= JSON.stringify(access_claims, null, 2) %></pre>
+  <% } %>
+
+  <% if (id_token) { %>
+    <h2>ID Token</h2>
+    <button onclick='copyToClipboard("<%= id_token %>")'>Copy ID Token</button>
+    <pre><%= JSON.stringify(id_claims, null, 2) %></pre>
+  <% } %>
+
+  <h2>Raw Token Response</h2>
+  <pre><%= raw_tokens %></pre>
+  <p><strong>Expires at:</strong> <script>document.write(formatExpiration(<%= expires_in %>))</script></p>
+
+  <br>
+  <a href="/">Back</a><br>
+  <a href="/logout">Logout from IDP</a>
+</body>
+</html>
